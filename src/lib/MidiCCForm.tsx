@@ -1,6 +1,11 @@
 import { useEffect, useState, useCallback, memo } from "react";
 import { HexColorPicker } from "react-colorful";
-import labelHandler from "../util/labelHandler";
+import {
+  handleLabelClick,
+  handleLabelChange,
+  handleLabelBlur,
+  handleLabelKeyDown,
+} from "../util/labelHandler";
 import useColorPicker from "../hooks/useColorPicker";
 import type { MidiCCFormData } from "../types";
 import {
@@ -55,13 +60,6 @@ const MidiCCForm = memo(
   }: MidiCCFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const { isPickerOpen, pickerRef, togglePicker } = useColorPicker();
-
-    const {
-      handleLabelClick,
-      handleLabelChange,
-      handleLabelBlur,
-      handleLabelKeyDown,
-    } = labelHandler;
 
     const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = Number(e.target.value);

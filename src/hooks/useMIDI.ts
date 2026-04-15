@@ -13,7 +13,7 @@ interface UseMIDIReturn {
   sendPC: (channel: number, program: number) => void;
 }
 
-export default function useMIDI({ onCC }: UseMIDIOptions = {}): UseMIDIReturn {
+const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
   const [deviceList, setDeviceList] = useState<string[]>([]);
   const [device, setDevice] = useState("");
   const [isMidiOutput, setIsMidiOutput] = useState(false);
@@ -120,4 +120,6 @@ export default function useMIDI({ onCC }: UseMIDIOptions = {}): UseMIDIReturn {
   );
 
   return { deviceList, device, setDevice, isMidiOutput, sendCC, sendPC };
-}
+};
+
+export default useMIDI;

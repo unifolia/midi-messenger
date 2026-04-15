@@ -224,7 +224,7 @@ export const ColorPicker = styled(FormGroup)`
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  padding-top: 1.5rem;
+  padding-top: ${theme.spacing.lg};
   margin-bottom: 0;
   position: relative;
 `;
@@ -424,6 +424,22 @@ export const SendButton = styled(BaseButton)`
       box-shadow: 0 0 0 0 transparent;
     }
   }
+`;
+
+export const DeviceContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${theme.spacing.xs};
+  margin-bottom: ${theme.spacing.md};
+`;
+
+export const DeviceHeading = styled.h3`
+  margin: 0;
+`;
+
+export const FooterText = styled.p`
+  font-size: 1.25rem;
 `;
 
 export const Input = styled.input`

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
-export default function useColorPicker() {
+const useColorPicker = () => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -22,4 +22,6 @@ export default function useColorPicker() {
   }, []);
 
   return { isPickerOpen, pickerRef, togglePicker };
-}
+};
+
+export default useColorPicker;

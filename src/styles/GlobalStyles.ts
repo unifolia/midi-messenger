@@ -78,7 +78,7 @@ export const Title = styled.h1`
 export const BaseButton = styled.button`
   border-radius: ${theme.borderRadius.md};
   border: 1px solid var(--surface-glass-border);
-  padding: 0.8em 1.5em;
+  padding: 0.8rem 1.5rem;
   font-size: ${theme.fonts.sizes.body};
   font-weight: ${theme.fonts.weights.normal};
   font-family: inherit;

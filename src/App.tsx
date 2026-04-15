@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useMemo } from "react";
 import MidiCCForm from "./lib/MidiCCForm";
 import MidiPCForm from "./lib/MidiPCForm";
 import Header from "./lib/Header";
-import { FormsContainer } from "./styles/components";
+import { FormsContainer, FooterText } from "./styles/components";
 import { Title } from "./styles/GlobalStyles";
 import Navigation from "./lib/NavBar";
 import Device from "./lib/Device";
@@ -388,9 +388,7 @@ const App = () => {
         })}
       </FormsContainer>
       <footer>
-        <p style={{ fontSize: "1.25rem" }}>
-          𐙦 Midi Engineering
-        </p>
+        <FooterText>𐙦 Midi Engineering</FooterText>
       </footer>
     </main>
   );

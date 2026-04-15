@@ -15,7 +15,12 @@ import {
   ColorSwatch,
   ColorPopover,
 } from "../styles/components";
-import labelHandler from "../util/labelHandler";
+import {
+  handleLabelClick,
+  handleLabelChange,
+  handleLabelBlur,
+  handleLabelKeyDown,
+} from "../util/labelHandler";
 import useColorPicker from "../hooks/useColorPicker";
 import type { MidiPCFormData } from "../types";
 
@@ -55,13 +60,6 @@ const MidiPCForm = memo(
     const [sent, setSent] = useState(false);
     const sentTimer = useRef<ReturnType<typeof setTimeout>>();
     const { isPickerOpen, pickerRef, togglePicker } = useColorPicker();
-
-    const {
-      handleLabelClick,
-      handleLabelChange,
-      handleLabelBlur,
-      handleLabelKeyDown,
-    } = labelHandler;
 
     const handlePointerDown = useCallback(
       (e: React.PointerEvent) => {

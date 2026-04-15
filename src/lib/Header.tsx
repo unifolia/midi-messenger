@@ -1,5 +1,10 @@
 import { useState } from "react";
-import labelHandler from "../util/labelHandler";
+import {
+  handleLabelClick,
+  handleLabelChange,
+  handleLabelBlur,
+  handleLabelKeyDown,
+} from "../util/labelHandler";
 import {
   FormClickable,
   FormTitleDisplay,
@@ -13,12 +18,6 @@ interface HeaderProps {
 
 const Header = ({ name, setName }: HeaderProps) => {
   const [isEditing, setIsEditing] = useState(true);
-  const {
-    handleLabelClick,
-    handleLabelChange,
-    handleLabelBlur,
-    handleLabelKeyDown,
-  } = labelHandler;
 
   return (
     <FormClickable>

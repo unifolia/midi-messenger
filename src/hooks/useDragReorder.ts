@@ -8,10 +8,10 @@ import {
 
 const INTERACTIVE_SELECTOR = "select, input, button, textarea, .react-colorful";
 
-export default function useDragReorder(
+const useDragReorder = (
   items: { id: number }[],
   onCommit: (orderedIds: number[]) => void
-) {
+) => {
   const [orderedIds, setOrderedIds] = useState<number[]>(() =>
     items.map((i) => i.id)
   );
@@ -295,4 +295,6 @@ export default function useDragReorder(
     registerRef,
     containerRef,
   };
-}
+};
+
+export default useDragReorder;

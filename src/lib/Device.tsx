@@ -1,4 +1,8 @@
-import { GlobalChannelSelect } from "../styles/components";
+import {
+  GlobalChannelSelect,
+  DeviceContainer,
+  DeviceHeading,
+} from "../styles/components";
 
 interface DeviceProps {
   device: string;
@@ -8,8 +12,8 @@ interface DeviceProps {
 
 const Device = ({ device, deviceList, setDevice }: DeviceProps) => {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-      <h3 id="device-heading" style={{ margin: 0 }}>MIDI Device:</h3>
+    <DeviceContainer>
+      <DeviceHeading id="device-heading">MIDI Device:</DeviceHeading>
       <GlobalChannelSelect
         id="midi-device"
         aria-labelledby="device-heading"
@@ -23,7 +27,7 @@ const Device = ({ device, deviceList, setDevice }: DeviceProps) => {
           </option>
         ))}
       </GlobalChannelSelect>
-    </div>
+    </DeviceContainer>
   );
 };
 
