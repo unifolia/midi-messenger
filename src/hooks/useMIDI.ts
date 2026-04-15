@@ -46,7 +46,7 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
       ...new Set(
         outputs
           .map((output) => output.name)
-          .filter((name): name is string => name !== null && name !== "")
+          .filter((name): name is string => name !== null && name !== ""),
       ),
     ];
     setDeviceList(names);
@@ -59,7 +59,10 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
   const attachInputListeners = useCallback((midiAccess: MIDIAccess) => {
     for (const input of midiAccess.inputs.values()) {
       input.onmidimessage = (event: MIDIMessageEvent) => {
-        if (event.target && (event.target as MIDIInput).name !== deviceRef.current) {
+        if (
+          event.target &&
+          (event.target as MIDIInput).name !== deviceRef.current
+        ) {
           return;
         }
 
@@ -93,7 +96,7 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
           attachInputListeners(midiAccess);
         };
       },
-      () => console.error("Failed to access MIDI devices.")
+      () => console.error("Failed to access MIDI devices."),
     );
   }, [updateDeviceList, attachInputListeners]);
 
@@ -101,7 +104,7 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
     const midiAccess = midiAccessRef.current;
     if (!midiAccess) return undefined;
     return Array.from(midiAccess.outputs.values()).find(
-      (o) => o.name === deviceRef.current
+      (o) => o.name === deviceRef.current,
     );
   }, []);
 
@@ -109,14 +112,14 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
     (channel: number, cc: number, value: number) => {
       getOutput()?.send([0xb0 + channel - 1, cc, value]);
     },
-    [getOutput]
+    [getOutput],
   );
 
   const sendPC = useCallback(
     (channel: number, program: number) => {
       getOutput()?.send([0xc0 + channel - 1, program]);
     },
-    [getOutput]
+    [getOutput],
   );
 
   return { deviceList, device, setDevice, isMidiOutput, sendCC, sendPC };

@@ -1,11 +1,9 @@
 export const theme = {
   colors: {
-    // Brand
     primary: "#ff288c",
     primaryLight: "#ff5a9e",
     primaryMuted: "#ff6b9d",
 
-    // Surfaces
     background: "#1a1a1a",
     surfaceDark: "#1a1a2e",
     surfaceGlass: "rgba(255, 255, 255, 0.05)",
@@ -14,22 +12,18 @@ export const theme = {
     surfaceInput: "rgba(255, 255, 255, 0.03)",
     surfacePopover: "rgba(26, 26, 46, 0.95)",
 
-    // Primary at various opacities (for hover/focus/active states)
     primaryAlpha5: "rgba(255, 40, 140, 0.05)",
     primaryAlpha8: "rgba(255, 40, 140, 0.08)",
     primaryAlpha20: "rgba(255, 40, 140, 0.2)",
     primaryAlpha30: "rgba(255, 40, 140, 0.3)",
 
-    // Text
     textPrimary: "#ffffff",
     textSecondary: "#e4e4e4",
 
-    // Danger (remove button)
     danger: "#ff4757",
     dangerAlpha10: "rgba(255, 71, 87, 0.1)",
     dangerAlpha30: "rgba(255, 71, 87, 0.3)",
 
-    // Utility
     black: "#000000",
     insetHighlight: "rgba(255, 255, 255, 0.1)",
     insetHighlightStrong: "rgba(255, 255, 255, 0.15)",
@@ -37,8 +31,7 @@ export const theme = {
   gradients: {
     rangeTrack:
       "linear-gradient(90deg, rgba(255, 40, 140, 0.2), rgba(255, 90, 158, 0.2), rgba(255, 107, 157, 0.2))",
-    rangeThumb:
-      "linear-gradient(135deg, var(--primary), var(--primary-light))",
+    rangeThumb: "linear-gradient(135deg, var(--primary), var(--primary-light))",
     textGradient:
       "linear-gradient(135deg, var(--primary), var(--primary-light), var(--primary-muted))",
   },

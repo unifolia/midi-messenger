@@ -30,7 +30,7 @@ interface MidiCCFormProps {
   updateCCFormField: (
     id: number,
     field: keyof MidiCCFormData,
-    value: string | number
+    value: string | number,
   ) => void;
   midiChannel: number;
   midiCC: number;
@@ -76,7 +76,7 @@ const MidiCCForm = memo(
       (e: React.PointerEvent) => {
         onDragPointerDown?.(e, id);
       },
-      [onDragPointerDown, id]
+      [onDragPointerDown, id],
     );
 
     return (
@@ -100,16 +100,11 @@ const MidiCCForm = memo(
                 value={label}
                 aria-label="Control block name"
                 onChange={(e) =>
-                  handleLabelChange(
-                    (v) => updateCCFormField(id, "label", v),
-                    e
-                  )
+                  handleLabelChange((v) => updateCCFormField(id, "label", v), e)
                 }
                 onBlur={() =>
-                  handleLabelBlur(
-                    setIsEditing,
-                    label,
-                    (v) => updateCCFormField(id, "label", v)
+                  handleLabelBlur(setIsEditing, label, (v) =>
+                    updateCCFormField(id, "label", v),
                   )
                 }
                 onKeyDown={(e) => handleLabelKeyDown(setIsEditing, e)}
@@ -206,7 +201,7 @@ const MidiCCForm = memo(
         </ColorPicker>
       </MidiFormContainer>
     );
-  }
+  },
 );
 
 export default MidiCCForm;

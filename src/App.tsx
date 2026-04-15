@@ -28,7 +28,7 @@ const App = () => {
   });
   const nextIdRef = useRef(2);
   const [globalMidiChannel, setGlobalMidiChannel] = useState<number | null>(
-    null
+    null,
   );
 
   const [pcForms, setPcForms] = useState<MidiPCFormData[]>([
@@ -50,7 +50,7 @@ const App = () => {
       inputs: prev.inputs.map((form) =>
         form.midiChannel === channel && form.midiCC === cc
           ? { ...form, value }
-          : form
+          : form,
       ),
     }));
   }, []);
@@ -58,10 +58,7 @@ const App = () => {
   const { deviceList, device, setDevice, isMidiOutput, sendCC, sendPC } =
     useMIDI({ onCC });
 
-  const allItems = useMemo(
-    () => formOrder.map((id) => ({ id })),
-    [formOrder]
-  );
+  const allItems = useMemo(() => formOrder.map((id) => ({ id })), [formOrder]);
 
   const handleReorder = useCallback((reorderedIds: number[]) => {
     setFormOrder(reorderedIds);
@@ -74,12 +71,17 @@ const App = () => {
     setPcForms((prev) =>
       reorderedIds
         .filter((id) => prev.some((f) => f.id === id))
-        .map((id) => prev.find((f) => f.id === id)!)
+        .map((id) => prev.find((f) => f.id === id)!),
     );
   }, []);
 
-  const { orderedIds, draggedId, handlePointerDown, registerRef, containerRef } =
-    useDragReorder(allItems, handleReorder);
+  const {
+    orderedIds,
+    draggedId,
+    handlePointerDown,
+    registerRef,
+    containerRef,
+  } = useDragReorder(allItems, handleReorder);
 
   const allFormsById = useMemo(() => {
     const map = new Map<
@@ -103,7 +105,7 @@ const App = () => {
         })),
       }));
       setPcForms((prev) =>
-        prev.map((pc) => ({ ...pc, midiChannel: newGlobalChannel }))
+        prev.map((pc) => ({ ...pc, midiChannel: newGlobalChannel })),
       );
     }
   };
@@ -166,22 +168,22 @@ const App = () => {
       setForms((prev) => ({
         ...prev,
         inputs: prev.inputs.map((form) =>
-          form.id === id ? { ...form, [field]: value } : form
+          form.id === id ? { ...form, [field]: value } : form,
         ),
       }));
     },
-    []
+    [],
   );
 
   const updatePCFormField = useCallback(
     (id: number, field: keyof MidiPCFormData, value: string | number) => {
       setPcForms((prev) =>
         prev.map((form) =>
-          form.id === id ? { ...form, [field]: value } : form
-        )
+          form.id === id ? { ...form, [field]: value } : form,
+        ),
       );
     },
-    []
+    [],
   );
 
   const savePreset = async () => {
@@ -244,7 +246,7 @@ const App = () => {
               typeof f.midiCC === "number" &&
               typeof f.value === "number" &&
               typeof f.label === "string" &&
-              typeof f.backgroundColor === "string"
+              typeof f.backgroundColor === "string",
           ) as MidiCCFormData[];
 
           if (validForms.length === 0) {
@@ -253,7 +255,8 @@ const App = () => {
           }
 
           setForms({
-            name: typeof preset.name === "string" ? preset.name : "Untitled Preset",
+            name:
+              typeof preset.name === "string" ? preset.name : "Untitled Preset",
             inputs: validForms,
           });
 
@@ -268,7 +271,7 @@ const App = () => {
                 typeof f.midiChannel === "number" &&
                 typeof f.program === "number" &&
                 typeof f.label === "string" &&
-                typeof f.backgroundColor === "string"
+                typeof f.backgroundColor === "string",
             ) as MidiPCFormData[];
             if (loadedPcForms.length > 0) {
               setPcForms(loadedPcForms);
@@ -295,7 +298,7 @@ const App = () => {
           if (Array.isArray(preset.formOrder)) {
             // Filter out stale IDs and append any missing ones
             const validOrder = preset.formOrder.filter((id: number) =>
-              allLoadedIds.has(id)
+              allLoadedIds.has(id),
             );
             const inOrder = new Set(validOrder);
             for (const id of allLoadedIds) {
@@ -325,7 +328,7 @@ const App = () => {
       {isMidiOutput ? (
         <Device device={device} deviceList={deviceList} setDevice={setDevice} />
       ) : (
-        <h3>No Midi Devices Connected</h3>
+        <h2>No Midi Devices Connected</h2>
       )}
 
       <Navigation

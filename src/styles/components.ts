@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { theme } from "./theme";
 import { BaseButton } from "./GlobalStyles";
 
-// Navigation Components
 export const NavBar = styled.nav`
   display: flex;
   justify-content: center;
@@ -15,7 +14,7 @@ export const NavBar = styled.nav`
   border-radius: ${theme.borderRadius.lg};
   box-shadow: ${theme.shadows.nav};
 
-  @media (max-width: 560px) {
+  @media (max-width: 720px) {
     flex-direction: column;
     justify-content: center;
     align-items: stretch;
@@ -434,7 +433,7 @@ export const DeviceContainer = styled.div`
   margin-bottom: ${theme.spacing.md};
 `;
 
-export const DeviceHeading = styled.h3`
+export const DeviceHeading = styled.h2`
   margin: 0;
 `;
 

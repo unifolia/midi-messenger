@@ -1,3 +1,5 @@
+// Genuinely the most complex part of this app
+
 import {
   useState,
   useRef,
@@ -10,10 +12,10 @@ const INTERACTIVE_SELECTOR = "select, input, button, textarea, .react-colorful";
 
 const useDragReorder = (
   items: { id: number }[],
-  onCommit: (orderedIds: number[]) => void
+  onCommit: (orderedIds: number[]) => void,
 ) => {
   const [orderedIds, setOrderedIds] = useState<number[]>(() =>
-    items.map((i) => i.id)
+    items.map((i) => i.id),
   );
   const [draggedId, setDraggedId] = useState<number | null>(null);
 
@@ -27,7 +29,6 @@ const useDragReorder = (
 
   onCommitRef.current = onCommit;
 
-  // Sync orderedIds with external item changes (add/remove/preset load)
   useEffect(() => {
     if (dragActiveRef.current) return;
     const newIds = items.map((i) => i.id);
@@ -35,12 +36,10 @@ const useDragReorder = (
     orderedIdsRef.current = newIds;
   }, [items]);
 
-  // Keep ref in sync with state
   useEffect(() => {
     orderedIdsRef.current = orderedIds;
   }, [orderedIds]);
 
-  // FLIP animation after orderedIds changes during drag
   useLayoutEffect(() => {
     if (!needsFlipRef.current) return;
     needsFlipRef.current = false;
@@ -70,14 +69,12 @@ const useDragReorder = (
         {
           duration: 200,
           easing: "cubic-bezier(0.25, 1, 0.5, 1)",
-        }
+        },
       );
     });
   }, [orderedIds, draggedId]);
 
-  // Snapshot rects before a reorder
   const snapshotRects = () => {
-    // Cancel ongoing animations so we get clean layout positions
     itemElsRef.current.forEach((el) => {
       el.getAnimations().forEach((a) => a.cancel());
     });
@@ -89,11 +86,10 @@ const useDragReorder = (
     needsFlipRef.current = true;
   };
 
-  // Compute where the dragged item should be inserted among non-dragged items
   const computeTargetIndex = (
     pointerX: number,
     pointerY: number,
-    dragId: number
+    dragId: number,
   ): number => {
     const currentOrder = orderedIdsRef.current;
 
@@ -109,18 +105,15 @@ const useDragReorder = (
       const { rect } = slots[i];
       const midX = rect.left + rect.width / 2;
 
-      // Pointer is above this row entirely
       if (pointerY < rect.top) return i;
-      // Pointer is in this row and before this item's center
       if (pointerY < rect.bottom && pointerX < midX) return i;
     }
 
-    return slots.length; // After all items
+    return slots.length;
   };
 
-  // Stable ref callback cache per item id
   const refCacheRef = useRef(
-    new Map<number, (el: HTMLElement | null) => void>()
+    new Map<number, (el: HTMLElement | null) => void>(),
   );
   const registerRef = useCallback((id: number) => {
     let fn = refCacheRef.current.get(id);
@@ -137,156 +130,149 @@ const useDragReorder = (
     return fn;
   }, []);
 
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent, id: number) => {
-      const target = e.target as HTMLElement;
-      if (target.closest(INTERACTIVE_SELECTOR)) return;
-      if (e.button !== 0) return;
+  const handlePointerDown = useCallback((e: React.PointerEvent, id: number) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(INTERACTIVE_SELECTOR)) return;
+    if (e.button !== 0) return;
 
-      const el = itemElsRef.current.get(id);
-      if (!el) return;
+    const el = itemElsRef.current.get(id);
+    if (!el) return;
 
-      e.preventDefault();
+    e.preventDefault();
 
-      const rect = el.getBoundingClientRect();
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const offsetX = e.clientX - rect.left;
-      const offsetY = e.clientY - rect.top;
+    const rect = el.getBoundingClientRect();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
 
-      let clone: HTMLElement | null = null;
-      let activated = false;
-      const originalOrder = [...orderedIdsRef.current];
+    let clone: HTMLElement | null = null;
+    let activated = false;
+    const originalOrder = [...orderedIdsRef.current];
 
-      const activate = () => {
-        activated = true;
-        dragActiveRef.current = true;
+    const activate = () => {
+      activated = true;
+      dragActiveRef.current = true;
 
-        clone = el.cloneNode(true) as HTMLElement;
-        const currentRect = el.getBoundingClientRect();
+      clone = el.cloneNode(true) as HTMLElement;
+      const currentRect = el.getBoundingClientRect();
 
-        clone.style.position = "fixed";
-        clone.style.left = `${currentRect.left}px`;
-        clone.style.top = `${currentRect.top}px`;
-        clone.style.width = `${currentRect.width}px`;
-        clone.style.height = `${currentRect.height}px`;
-        clone.style.zIndex = "9999";
-        clone.style.margin = "0";
-        clone.style.pointerEvents = "none";
-        clone.style.opacity = "0.85";
-        clone.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)";
-        clone.style.cursor = "grabbing";
-        clone.style.willChange = "left, top";
-        clone.style.transition = "box-shadow 200ms, opacity 200ms";
+      clone.style.position = "fixed";
+      clone.style.left = `${currentRect.left}px`;
+      clone.style.top = `${currentRect.top}px`;
+      clone.style.width = `${currentRect.width}px`;
+      clone.style.height = `${currentRect.height}px`;
+      clone.style.zIndex = "9999";
+      clone.style.margin = "0";
+      clone.style.pointerEvents = "none";
+      clone.style.opacity = "0.85";
+      clone.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)";
+      clone.style.cursor = "grabbing";
+      clone.style.willChange = "left, top";
+      clone.style.transition = "box-shadow 200ms, opacity 200ms";
 
-        document.body.appendChild(clone);
-        document.body.style.cursor = "grabbing";
-        document.body.style.userSelect = "none";
+      document.body.appendChild(clone);
+      document.body.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
 
-        el.style.opacity = "0";
-        el.style.transition = "none";
+      el.style.opacity = "0";
+      el.style.transition = "none";
 
-        setDraggedId(id);
+      setDraggedId(id);
+    };
+
+    const onMove = (me: PointerEvent) => {
+      if (!activated) {
+        const dx = me.clientX - startX;
+        const dy = me.clientY - startY;
+        if (Math.sqrt(dx * dx + dy * dy) < 5) return;
+        activate();
+      }
+
+      if (clone) {
+        clone.style.left = `${me.clientX - offsetX}px`;
+        clone.style.top = `${me.clientY - offsetY}px`;
+      }
+
+      const targetIdx = computeTargetIndex(me.clientX, me.clientY, id);
+      const currentOrder = orderedIdsRef.current;
+      const withoutDragged = currentOrder.filter((cid) => cid !== id);
+      const newOrder = [...withoutDragged];
+      newOrder.splice(targetIdx, 0, id);
+
+      if (newOrder.some((nid, i) => nid !== currentOrder[i])) {
+        snapshotRects();
+        orderedIdsRef.current = newOrder;
+        setOrderedIds(newOrder);
+      }
+    };
+
+    const cleanup = () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    const onUp = () => {
+      cleanup();
+
+      if (!activated || !clone) {
+        dragActiveRef.current = false;
+        return;
+      }
+
+      const suppressClick = (ce: MouseEvent) => {
+        ce.stopPropagation();
+        ce.preventDefault();
       };
+      document.addEventListener("click", suppressClick, { capture: true });
+      requestAnimationFrame(() => {
+        document.removeEventListener("click", suppressClick, {
+          capture: true,
+        });
+      });
 
-      const onMove = (me: PointerEvent) => {
-        if (!activated) {
-          const dx = me.clientX - startX;
-          const dy = me.clientY - startY;
-          if (Math.sqrt(dx * dx + dy * dy) < 5) return;
-          activate();
-        }
+      const finalRect = el.getBoundingClientRect();
+      clone.style.transition =
+        "left 200ms cubic-bezier(0.25, 1, 0.5, 1), top 200ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 200ms, opacity 200ms";
+      clone.style.left = `${finalRect.left}px`;
+      clone.style.top = `${finalRect.top}px`;
+      clone.style.boxShadow = "";
+      clone.style.opacity = "1";
 
-        if (clone) {
-          clone.style.left = `${me.clientX - offsetX}px`;
-          clone.style.top = `${me.clientY - offsetY}px`;
-        }
+      const cloneToRemove = clone;
+      setTimeout(() => {
+        cloneToRemove.remove();
+        el.style.opacity = "";
+        el.style.transition = "";
+        setDraggedId(null);
+        dragActiveRef.current = false;
+        onCommitRef.current(orderedIdsRef.current);
+      }, 200);
+    };
 
-        // Compute target insertion index among non-dragged items
-        const targetIdx = computeTargetIndex(me.clientX, me.clientY, id);
-        const currentOrder = orderedIdsRef.current;
-        const withoutDragged = currentOrder.filter((cid) => cid !== id);
-        const newOrder = [...withoutDragged];
-        newOrder.splice(targetIdx, 0, id);
-
-        if (newOrder.some((nid, i) => nid !== currentOrder[i])) {
-          snapshotRects();
-          orderedIdsRef.current = newOrder;
-          setOrderedIds(newOrder);
-        }
-      };
-
-      const cleanup = () => {
-        document.removeEventListener("pointermove", onMove);
-        document.removeEventListener("pointerup", onUp);
-        document.removeEventListener("keydown", onKeyDown);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-
-      const onUp = () => {
+    const onKeyDown = (ke: KeyboardEvent) => {
+      if (ke.key === "Escape") {
         cleanup();
 
-        if (!activated || !clone) {
-          dragActiveRef.current = false;
-          return;
-        }
+        if (clone) clone.remove();
+        el.style.opacity = "";
+        el.style.transition = "";
 
-        // Suppress any click event that fires as a result of this pointerup
-        const suppressClick = (ce: MouseEvent) => {
-          ce.stopPropagation();
-          ce.preventDefault();
-        };
-        document.addEventListener("click", suppressClick, { capture: true });
-        requestAnimationFrame(() => {
-          document.removeEventListener("click", suppressClick, {
-            capture: true,
-          });
-        });
+        snapshotRects();
+        orderedIdsRef.current = originalOrder;
+        setOrderedIds(originalOrder);
+        setDraggedId(null);
+        dragActiveRef.current = false;
+      }
+    };
 
-        // Animate clone to the final grid cell position
-        const finalRect = el.getBoundingClientRect();
-        clone.style.transition =
-          "left 200ms cubic-bezier(0.25, 1, 0.5, 1), top 200ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 200ms, opacity 200ms";
-        clone.style.left = `${finalRect.left}px`;
-        clone.style.top = `${finalRect.top}px`;
-        clone.style.boxShadow = "";
-        clone.style.opacity = "1";
-
-        const cloneToRemove = clone;
-        setTimeout(() => {
-          cloneToRemove.remove();
-          el.style.opacity = "";
-          el.style.transition = "";
-          setDraggedId(null);
-          dragActiveRef.current = false;
-          onCommitRef.current(orderedIdsRef.current);
-        }, 200);
-      };
-
-      const onKeyDown = (ke: KeyboardEvent) => {
-        if (ke.key === "Escape") {
-          cleanup();
-
-          if (clone) clone.remove();
-          el.style.opacity = "";
-          el.style.transition = "";
-
-          // Restore original order with FLIP animation
-          snapshotRects();
-          orderedIdsRef.current = originalOrder;
-          setOrderedIds(originalOrder);
-          setDraggedId(null);
-          dragActiveRef.current = false;
-        }
-      };
-
-      document.addEventListener("pointermove", onMove);
-      document.addEventListener("pointerup", onUp);
-      document.addEventListener("keydown", onKeyDown);
-    },
-    []
-  );
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("keydown", onKeyDown);
+  }, []);
 
   return {
     orderedIds,

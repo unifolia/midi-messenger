@@ -6,7 +6,7 @@ export const handleLabelClick = (setIsEditing: (editing: boolean) => void) => {
 
 export const handleLabelChange = (
   setLabel: (label: string) => void,
-  e: React.ChangeEvent<HTMLInputElement>
+  e: React.ChangeEvent<HTMLInputElement>,
 ) => {
   setLabel(e.target.value);
 };
@@ -14,7 +14,7 @@ export const handleLabelChange = (
 export const handleLabelBlur = (
   setIsEditing: (editing: boolean) => void,
   name: string | number,
-  setName: (name: string) => void
+  setName: (name: string) => void,
 ) => {
   if (name) {
     setIsEditing(false);
@@ -26,7 +26,7 @@ export const handleLabelBlur = (
 
 export const handleLabelKeyDown = (
   setIsEditing: (editing: boolean) => void,
-  e: React.KeyboardEvent
+  e: React.KeyboardEvent,
 ) => {
   if (e.key === "Enter" || e.key === "Escape") {
     setIsEditing(false);

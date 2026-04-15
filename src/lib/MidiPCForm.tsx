@@ -30,7 +30,7 @@ interface MidiPCFormProps {
   updatePCFormField: (
     id: number,
     field: keyof MidiPCFormData,
-    value: string | number
+    value: string | number,
   ) => void;
   midiChannel: number;
   program: number;
@@ -65,7 +65,7 @@ const MidiPCForm = memo(
       (e: React.PointerEvent) => {
         onDragPointerDown?.(e, id);
       },
-      [onDragPointerDown, id]
+      [onDragPointerDown, id],
     );
 
     return (
@@ -89,16 +89,11 @@ const MidiPCForm = memo(
                 value={label}
                 aria-label="Control block name"
                 onChange={(e) =>
-                  handleLabelChange(
-                    (v) => updatePCFormField(id, "label", v),
-                    e
-                  )
+                  handleLabelChange((v) => updatePCFormField(id, "label", v), e)
                 }
                 onBlur={() =>
-                  handleLabelBlur(
-                    setIsEditing,
-                    label,
-                    (v) => updatePCFormField(id, "label", v)
+                  handleLabelBlur(setIsEditing, label, (v) =>
+                    updatePCFormField(id, "label", v),
                   )
                 }
                 onKeyDown={(e) => handleLabelKeyDown(setIsEditing, e)}
@@ -195,7 +190,7 @@ const MidiPCForm = memo(
         </ColorPicker>
       </MidiFormContainer>
     );
-  }
+  },
 );
 
 export default MidiPCForm;
