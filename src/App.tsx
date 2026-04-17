@@ -8,11 +8,12 @@ import Navigation from "./lib/NavBar";
 import Device from "./lib/Device";
 import useMIDI from "./hooks/useMIDI";
 import useDragReorder from "./hooks/useDragReorder";
-import type { MidiCCFormData, MidiPCFormData } from "./types";
+import type { MidiCCFormData, MidiPCFormData, Layout } from "./types";
 
 const DEFAULT_BG = "#909090";
 
 const App = () => {
+  const [layout, setLayout] = useState<Layout>("tile");
   const [forms, setForms] = useState({
     name: "Untitled Preset",
     inputs: [
@@ -57,6 +58,11 @@ const App = () => {
 
   const { deviceList, device, setDevice, isMidiOutput, sendCC, sendPC } =
     useMIDI({ onCC });
+
+  const toggleLayout = useCallback(
+    () => setLayout((l) => (l === "tile" ? "row" : "tile")),
+    [],
+  );
 
   const allItems = useMemo(() => formOrder.map((id) => ({ id })), [formOrder]);
 
@@ -338,6 +344,8 @@ const App = () => {
         handleLoadPreset={handleLoadPreset}
         globalMidiChannel={globalMidiChannel}
         handleGlobalMidiChannelChange={handleGlobalMidiChannelChange}
+        layout={layout}
+        onToggleLayout={toggleLayout}
       />
 
       <Header
@@ -347,7 +355,7 @@ const App = () => {
         }
       />
 
-      <FormsContainer ref={containerRef}>
+      <FormsContainer ref={containerRef} $layout={layout}>
         {orderedIds.map((id) => {
           const item = allFormsById.get(id);
           if (!item) return null;
@@ -368,6 +376,7 @@ const App = () => {
                 dragRef={registerRef(form.id)}
                 onDragPointerDown={handlePointerDown}
                 isDragging={draggedId === form.id}
+                layout={layout}
               />
             );
           }
@@ -386,6 +395,7 @@ const App = () => {
               dragRef={registerRef(pc.id)}
               onDragPointerDown={handlePointerDown}
               isDragging={draggedId === pc.id}
+              layout={layout}
             />
           );
         })}

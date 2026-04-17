@@ -14,6 +14,7 @@ const useDragReorder = (
   items: { id: number }[],
   onCommit: (orderedIds: number[]) => void,
 ) => {
+
   const [orderedIds, setOrderedIds] = useState<number[]>(() =>
     items.map((i) => i.id),
   );
@@ -101,12 +102,27 @@ const useDragReorder = (
       slots.push({ id, rect: el.getBoundingClientRect() });
     }
 
+    // Detect multi-column layout by scanning adjacent pairs. If any pair
+    // vertically overlaps, cards are laid out side-by-side.
+    let singleColumn = true;
+    for (let i = 1; i < slots.length; i++) {
+      if (slots[i].rect.top < slots[i - 1].rect.bottom - 1) {
+        singleColumn = false;
+        break;
+      }
+    }
+
     for (let i = 0; i < slots.length; i++) {
       const { rect } = slots[i];
-      const midX = rect.left + rect.width / 2;
 
-      if (pointerY < rect.top) return i;
-      if (pointerY < rect.bottom && pointerX < midX) return i;
+      if (singleColumn) {
+        const midY = rect.top + rect.height / 2;
+        if (pointerY < midY) return i;
+      } else {
+        const midX = rect.left + rect.width / 2;
+        if (pointerY < rect.top) return i;
+        if (pointerY < rect.bottom && pointerX < midX) return i;
+      }
     }
 
     return slots.length;

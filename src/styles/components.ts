@@ -1,6 +1,75 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { theme } from "./theme";
 import { BaseButton } from "./GlobalStyles";
+import type { Layout } from "../types";
+
+// Styling mixins for layout-dependent breakpoints. A card is "narrow-stacked"
+// when it's rendering vertically in a single column: either tile mode at
+// ≤700px, or row mode at ≤rowStack. "Row-wide" means row mode at >rowStack.
+const rowWide = (styles: ReturnType<typeof css>) => css`
+  [data-layout="row"] & {
+    @media (min-width: 1101px) {
+      ${styles}
+    }
+  }
+`;
+
+const rowWideSelf = (styles: ReturnType<typeof css>) => css`
+  &[data-layout="row"] {
+    @media (min-width: 1101px) {
+      ${styles}
+    }
+  }
+`;
+
+const narrowStacked = (styles: ReturnType<typeof css>) => css`
+  @media (max-width: 700px) {
+    ${styles}
+  }
+
+  [data-layout="row"] & {
+    @media (max-width: ${theme.breakpoints.rowStack}) {
+      ${styles}
+    }
+  }
+`;
+
+const narrowStackedSelf = (styles: ReturnType<typeof css>) => css`
+  @media (max-width: 700px) {
+    ${styles}
+  }
+
+  &[data-layout="row"] {
+    @media (max-width: ${theme.breakpoints.rowStack}) {
+      ${styles}
+    }
+  }
+`;
+
+const inlineSelectWide = css`
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: ${theme.spacing.sm};
+
+  select {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+`;
+
+const inlineSelectNarrow = css`
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: ${theme.spacing.sm};
+
+  select {
+    flex: 0 1 auto;
+    min-width: 70px;
+    max-width: 150px;
+  }
+`;
 
 export const NavBar = styled.nav`
   display: flex;
@@ -14,7 +83,7 @@ export const NavBar = styled.nav`
   border-radius: ${theme.borderRadius.lg};
   box-shadow: ${theme.shadows.nav};
 
-  @media (max-width: 720px) {
+  @media (max-width: ${theme.breakpoints.rowStack}) {
     flex-direction: column;
     justify-content: center;
     align-items: stretch;
@@ -49,19 +118,41 @@ export const GlobalChannelContainer = styled.div`
 `;
 
 // Form Components
-export const FormsContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: ${theme.spacing.lg};
-  margin: ${theme.spacing.xl} 0;
+export const FormsContainer = styled.div<{ $layout?: Layout }>`
+  ${({ $layout }) =>
+    $layout === "row"
+      ? css`
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
 
-  @media (max-width: 700px) {
-    grid-template-columns: 1fr;
-  }
+          @media (max-width: ${theme.breakpoints.rowStack}) {
+            gap: ${theme.spacing.lg};
+          }
 
-  @media (min-width: ${theme.breakpoints.big}) {
-    grid-template-columns: repeat(4, 1fr);
-  }
+          @media (min-width: ${theme.breakpoints.huge}) {
+            flex-direction: row;
+            flex-wrap: wrap;
+
+            & > * {
+              flex: 0 0 calc(50% - 2.5px);
+              max-width: calc(50% - 2.5px);
+            }
+          }
+        `
+      : css`
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: ${theme.spacing.lg};
+
+          @media (max-width: 700px) {
+            grid-template-columns: 1fr;
+          }
+
+          @media (min-width: ${theme.breakpoints.big}) {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        `}
 `;
 
 export const MidiFormContainer = styled.div`
@@ -80,6 +171,17 @@ export const MidiFormContainer = styled.div`
     box-shadow: ${theme.shadows.glassHover};
     border-color: ${theme.colors.primaryAlpha30};
   }
+
+  ${rowWideSelf(css`
+    flex-direction: row;
+    align-items: center;
+    gap: ${theme.spacing.md};
+    padding: ${theme.spacing.sm} ${theme.spacing.md};
+  `)}
+
+  ${narrowStackedSelf(css`
+    padding: 0.5rem;
+  `)}
 `;
 
 export const FormHeader = styled.div`
@@ -89,11 +191,28 @@ export const FormHeader = styled.div`
   margin-bottom: ${theme.spacing.lg};
   padding-bottom: ${theme.spacing.md};
   border-bottom: 1px solid var(--surface-glass-border);
+
+  ${rowWide(css`
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    flex: 0 0 auto;
+    gap: ${theme.spacing.sm};
+  `)}
+
+  ${narrowStacked(css`
+    margin-bottom: ${theme.spacing.md};
+  `)}
 `;
 
 export const FormHeaderContent = styled.div`
   flex: 1;
   margin-right: ${theme.spacing.md};
+
+  ${rowWide(css`
+    flex: 0 0 auto;
+    margin-right: 0;
+  `)}
 `;
 
 export const FormTitleDisplay = styled.h3`
@@ -126,6 +245,18 @@ export const FormTitleDisplay = styled.h3`
   &.header {
     font-size: 1.8rem;
   }
+
+  ${rowWide(css`
+    width: 250px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (min-width: ${theme.breakpoints.huge}) {
+      width: 150px;
+    }
+  `)}
 `;
 
 export const FormTitleInput = styled.input`
@@ -149,8 +280,20 @@ export const FormTitleInput = styled.input`
   &.header {
     font-size: 1.8rem;
   }
+
+  ${rowWide(css`
+    width: 250px;
+
+    @media (min-width: ${theme.breakpoints.huge}) {
+      width: 150px;
+    }
+  `)}
 `;
 
+// Rendered twice per card — once inside FormHeader (data-placement="header")
+// for tile mode / narrow-stacked, once at the card end (data-placement="end")
+// for row-wide. CSS toggles display: none so only one is visible at a time,
+// keeping the hidden duplicate out of the accessibility tree.
 export const RemoveButton = styled.button`
   width: 32px;
   height: 32px;
@@ -203,12 +346,28 @@ export const RemoveButton = styled.button`
   &:active {
     transform: translateY(0);
   }
-`;
 
-export const FormClickable = styled.div`
-  min-height: 65px;
-  margin-top: ${theme.spacing.xl};
-  margin-bottom: ${theme.spacing.md};
+  &[data-placement="end"] {
+    display: none;
+  }
+
+  ${rowWide(css`
+    &[data-placement="end"] {
+      display: inline-block;
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+
+      &::before,
+      &::after {
+        width: 12px;
+      }
+    }
+
+    &[data-placement="header"] {
+      display: none;
+    }
+  `)}
 `;
 
 export const FormGroup = styled.div`
@@ -216,6 +375,43 @@ export const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${theme.spacing.xs};
+
+  ${rowWide(css`
+    margin-bottom: 0;
+    flex: 1 1 0;
+    min-width: 0;
+  `)}
+
+  ${narrowStacked(css`
+    margin-bottom: 0;
+  `)}
+
+  [data-layout="row"] &:has(input[type="range"]) {
+    @media (min-width: 1101px) {
+      min-width: 150px;
+    }
+  }
+
+  [data-layout="row"] &:has(select) {
+    @media (min-width: 1101px) {
+      ${inlineSelectWide}
+    }
+
+    @media (max-width: ${theme.breakpoints.rowStack}) {
+      ${inlineSelectNarrow}
+    }
+  }
+
+  &:has(select) {
+    @media (max-width: 700px) {
+      ${inlineSelectNarrow}
+    }
+  }
+`;
+
+export const FormClickable = styled.div`
+  margin-top: ${theme.spacing.lg};
+  margin-bottom: ${theme.spacing.lg};
 `;
 
 export const ColorPicker = styled(FormGroup)`
@@ -226,6 +422,14 @@ export const ColorPicker = styled(FormGroup)`
   padding-top: ${theme.spacing.lg};
   margin-bottom: 0;
   position: relative;
+
+  ${rowWide(css`
+    margin-top: 0;
+    padding-top: 0;
+    margin-left: auto;
+    flex: 0 0 auto;
+    gap: ${theme.spacing.sm};
+  `)}
 `;
 
 export const ColorSwatch = styled.button`
@@ -234,7 +438,6 @@ export const ColorSwatch = styled.button`
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.md};
   cursor: pointer;
-  transition: ${theme.transitions.default};
   padding: 0;
 
   &:hover {
@@ -245,6 +448,15 @@ export const ColorSwatch = styled.button`
     outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
+
+  ${rowWide(css`
+    width: 36px;
+    height: 26px;
+  `)}
+
+  ${narrowStacked(css`
+    height: 28px;
+  `)}
 `;
 
 export const ColorPopover = styled.div`
@@ -332,6 +544,16 @@ export const Select = styled.select`
     color: var(--text-primary);
     padding: ${theme.spacing.xs};
   }
+
+  ${rowWide(css`
+    padding: 0.35rem ${theme.spacing.lg} 0.35rem ${theme.spacing.sm};
+    font-size: ${theme.fonts.sizes.label};
+    max-width: 65px;
+  `)}
+
+  ${narrowStacked(css`
+    padding: 0.35rem ${theme.spacing.lg} 0.35rem ${theme.spacing.md};
+  `)}
 `;
 
 export const RangeInput = styled.input`
@@ -403,6 +625,15 @@ export const SendButton = styled(BaseButton)`
   margin-top: ${theme.spacing.md};
   align-self: center;
 
+  ${rowWide(css`
+    margin-top: 0;
+    width: auto;
+    flex: 0 0 auto;
+    padding: 0.35rem ${theme.spacing.md};
+    font-size: ${theme.fonts.sizes.label};
+    min-width: auto;
+  `)}
+
   &.sent {
     color: var(--primary);
     border-color: var(--primary);
@@ -443,4 +674,20 @@ export const FooterText = styled.p`
 
 export const Input = styled.input`
   cursor: pointer;
+`;
+
+export const SelectRow = styled.div`
+  display: contents;
+
+  ${narrowStacked(css`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: ${theme.spacing.md};
+
+    & > * {
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+  `)}
 `;

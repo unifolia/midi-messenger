@@ -8,6 +8,7 @@ import {
   GlobalChannelSelect,
 } from "../styles/components";
 import { Label } from "../styles/GlobalStyles";
+import type { Layout } from "../types";
 
 interface NavigationProps {
   handleAddCCInput: () => void;
@@ -16,6 +17,8 @@ interface NavigationProps {
   handleLoadPreset: (event: React.ChangeEvent<HTMLInputElement>) => void;
   globalMidiChannel: number | null;
   handleGlobalMidiChannelChange: (channel: number) => void;
+  layout: Layout;
+  onToggleLayout: () => void;
 }
 
 const Navigation = ({
@@ -25,6 +28,8 @@ const Navigation = ({
   handleLoadPreset,
   globalMidiChannel,
   handleGlobalMidiChannelChange,
+  layout,
+  onToggleLayout,
 }: NavigationProps) => {
   return (
     <NavBar>
@@ -44,7 +49,7 @@ const Navigation = ({
       </LoadButton>
       <GlobalChannelContainer>
         <GlobalChannelLabel htmlFor="global-select">
-          Global MIDI Channel:
+          Global Channel:
         </GlobalChannelLabel>
         <GlobalChannelSelect
           id="global-select"
@@ -62,6 +67,13 @@ const Navigation = ({
           ))}
         </GlobalChannelSelect>
       </GlobalChannelContainer>
+      <NavButton
+        onClick={onToggleLayout}
+        aria-pressed={layout === "row"}
+        aria-label={`Layout: ${layout}. Click to toggle.`}
+      >
+        {layout === "tile" ? "Tile" : "Row"}
+      </NavButton>
     </NavBar>
   );
 };
