@@ -28,7 +28,7 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0;
     display: flex;
     place-items: center;
-    min-width: 320px;
+    min-width: 400px;
     min-height: 100vh;
     font-family: ${theme.fonts.family};
     overflow-x: hidden;
@@ -46,6 +46,9 @@ export const GlobalStyles = createGlobalStyle`
     flex-direction: column;
     @media (min-width: ${theme.breakpoints.big}) {
       max-width: 1400px;
+    }
+    @media (min-width: ${theme.breakpoints.huge}) {
+      max-width: 1850px;
     }
   }
 

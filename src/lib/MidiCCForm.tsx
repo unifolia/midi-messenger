@@ -7,7 +7,7 @@ import {
   handleLabelKeyDown,
 } from "../util/labelHandler";
 import useColorPicker from "../hooks/useColorPicker";
-import type { MidiCCFormData } from "../types";
+import type { MidiCCFormData, Layout } from "../types";
 import {
   MidiFormContainer,
   FormHeader,
@@ -22,6 +22,8 @@ import {
   ColorPicker,
   ColorSwatch,
   ColorPopover,
+  HexInput,
+  SelectRow,
 } from "../styles/components";
 
 interface MidiCCFormProps {
@@ -41,6 +43,7 @@ interface MidiCCFormProps {
   dragRef?: (el: HTMLElement | null) => void;
   onDragPointerDown?: (e: React.PointerEvent, id: number) => void;
   isDragging?: boolean;
+  layout: Layout;
 }
 
 const MidiCCForm = memo(
@@ -57,6 +60,7 @@ const MidiCCForm = memo(
     dragRef,
     onDragPointerDown,
     isDragging,
+    layout,
   }: MidiCCFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const { isPickerOpen, pickerRef, togglePicker } = useColorPicker();
@@ -83,6 +87,7 @@ const MidiCCForm = memo(
       <MidiFormContainer
         ref={dragRef}
         onPointerDown={handlePointerDown}
+        data-layout={layout}
         style={{
           background: backgroundColor + "55",
           ...(isDragging && { opacity: 0 }),
@@ -128,44 +133,47 @@ const MidiCCForm = memo(
             )}
           </FormHeaderContent>
           <RemoveButton
+            data-placement="header"
             onClick={() => onRemove(id)}
             aria-label={`Remove ${label}`}
           />
         </FormHeader>
 
-        <FormGroup>
-          <FormLabel htmlFor={`midi-channel-${id}`}>MIDI Channel:</FormLabel>
-          <Select
-            id={`midi-channel-${id}`}
-            value={midiChannel}
-            onChange={(e) =>
-              updateCCFormField(id, "midiChannel", Number(e.target.value))
-            }
-          >
-            {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
-              <option key={channel} value={channel}>
-                {channel}
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
+        <SelectRow>
+          <FormGroup>
+            <FormLabel htmlFor={`midi-channel-${id}`}>Channel:</FormLabel>
+            <Select
+              id={`midi-channel-${id}`}
+              value={midiChannel}
+              onChange={(e) =>
+                updateCCFormField(id, "midiChannel", Number(e.target.value))
+              }
+            >
+              {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
+                <option key={channel} value={channel}>
+                  {channel}
+                </option>
+              ))}
+            </Select>
+          </FormGroup>
 
-        <FormGroup>
-          <FormLabel htmlFor={`midi-cc-${id}`}>MIDI CC:</FormLabel>
-          <Select
-            id={`midi-cc-${id}`}
-            value={midiCC}
-            onChange={(e) =>
-              updateCCFormField(id, "midiCC", Number(e.target.value))
-            }
-          >
-            {Array.from({ length: 128 }, (_, i) => i).map((cc) => (
-              <option key={cc} value={cc}>
-                {cc}
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
+          <FormGroup>
+            <FormLabel htmlFor={`midi-cc-${id}`}>MIDI CC:</FormLabel>
+            <Select
+              id={`midi-cc-${id}`}
+              value={midiCC}
+              onChange={(e) =>
+                updateCCFormField(id, "midiCC", Number(e.target.value))
+              }
+            >
+              {Array.from({ length: 128 }, (_, i) => i).map((cc) => (
+                <option key={cc} value={cc}>
+                  {cc}
+                </option>
+              ))}
+            </Select>
+          </FormGroup>
+        </SelectRow>
 
         <FormGroup>
           <FormLabel htmlFor={`value-slider-${id}`}>Value: {value}</FormLabel>
@@ -196,9 +204,23 @@ const MidiCCForm = memo(
                   updateCCFormField(id, "backgroundColor", color)
                 }
               />
+              <HexInput
+                color={backgroundColor}
+                onChange={(color) =>
+                  updateCCFormField(id, "backgroundColor", color)
+                }
+                prefixed
+                aria-label="Background hex code"
+              />
             </ColorPopover>
           )}
         </ColorPicker>
+
+        <RemoveButton
+          data-placement="end"
+          onClick={() => onRemove(id)}
+          aria-label={`Remove ${label}`}
+        />
       </MidiFormContainer>
     );
   },

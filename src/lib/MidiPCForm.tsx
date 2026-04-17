@@ -14,6 +14,8 @@ import {
   ColorPicker,
   ColorSwatch,
   ColorPopover,
+  HexInput,
+  SelectRow,
 } from "../styles/components";
 import {
   handleLabelClick,
@@ -22,7 +24,7 @@ import {
   handleLabelKeyDown,
 } from "../util/labelHandler";
 import useColorPicker from "../hooks/useColorPicker";
-import type { MidiPCFormData } from "../types";
+import type { MidiPCFormData, Layout } from "../types";
 
 interface MidiPCFormProps {
   id: number;
@@ -40,6 +42,7 @@ interface MidiPCFormProps {
   dragRef?: (el: HTMLElement | null) => void;
   onDragPointerDown?: (e: React.PointerEvent, id: number) => void;
   isDragging?: boolean;
+  layout: Layout;
 }
 
 const MidiPCForm = memo(
@@ -55,6 +58,7 @@ const MidiPCForm = memo(
     dragRef,
     onDragPointerDown,
     isDragging,
+    layout,
   }: MidiPCFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [sent, setSent] = useState(false);
@@ -72,6 +76,7 @@ const MidiPCForm = memo(
       <MidiFormContainer
         ref={dragRef}
         onPointerDown={handlePointerDown}
+        data-layout={layout}
         style={{
           background: backgroundColor + "55",
           ...(isDragging && { opacity: 0 }),
@@ -117,44 +122,47 @@ const MidiPCForm = memo(
             )}
           </FormHeaderContent>
           <RemoveButton
+            data-placement="header"
             onClick={() => onRemove(id)}
             aria-label={`Remove ${label}`}
           />
         </FormHeader>
 
-        <FormGroup>
-          <FormLabel htmlFor={`pc-midi-channel-${id}`}>MIDI Channel:</FormLabel>
-          <Select
-            id={`pc-midi-channel-${id}`}
-            value={midiChannel}
-            onChange={(e) =>
-              updatePCFormField(id, "midiChannel", Number(e.target.value))
-            }
-          >
-            {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
-              <option key={channel} value={channel}>
-                {channel}
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
+        <SelectRow>
+          <FormGroup>
+            <FormLabel htmlFor={`pc-midi-channel-${id}`}>Channel:</FormLabel>
+            <Select
+              id={`pc-midi-channel-${id}`}
+              value={midiChannel}
+              onChange={(e) =>
+                updatePCFormField(id, "midiChannel", Number(e.target.value))
+              }
+            >
+              {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
+                <option key={channel} value={channel}>
+                  {channel}
+                </option>
+              ))}
+            </Select>
+          </FormGroup>
 
-        <FormGroup>
-          <FormLabel htmlFor={`pc-program-${id}`}>Program:</FormLabel>
-          <Select
-            id={`pc-program-${id}`}
-            value={program}
-            onChange={(e) =>
-              updatePCFormField(id, "program", Number(e.target.value))
-            }
-          >
-            {Array.from({ length: 128 }, (_, i) => i).map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
+          <FormGroup>
+            <FormLabel htmlFor={`pc-program-${id}`}>MIDI PC:</FormLabel>
+            <Select
+              id={`pc-program-${id}`}
+              value={program}
+              onChange={(e) =>
+                updatePCFormField(id, "program", Number(e.target.value))
+              }
+            >
+              {Array.from({ length: 128 }, (_, i) => i).map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </Select>
+          </FormGroup>
+        </SelectRow>
 
         <SendButton
           type="button"
@@ -185,9 +193,23 @@ const MidiPCForm = memo(
                   updatePCFormField(id, "backgroundColor", color)
                 }
               />
+              <HexInput
+                color={backgroundColor}
+                onChange={(color) =>
+                  updatePCFormField(id, "backgroundColor", color)
+                }
+                prefixed
+                aria-label="Background hex code"
+              />
             </ColorPopover>
           )}
         </ColorPicker>
+
+        <RemoveButton
+          data-placement="end"
+          onClick={() => onRemove(id)}
+          aria-label={`Remove ${label}`}
+        />
       </MidiFormContainer>
     );
   },

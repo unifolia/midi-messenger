@@ -14,3 +14,5 @@ export interface MidiPCFormData {
   label: string;
   backgroundColor: string;
 }
+
+export type Layout = "tile" | "row";
