@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, memo } from "react";
+import { useState, useCallback, useEffect, useRef, memo } from "react";
 import { HexColorPicker } from "react-colorful";
 import {
   MidiFormContainer,
@@ -71,6 +71,8 @@ const MidiPCForm = memo(
       },
       [onDragPointerDown, id],
     );
+
+    useEffect(() => () => clearTimeout(sentTimer.current), []);
 
     return (
       <MidiFormContainer

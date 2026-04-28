@@ -85,8 +85,13 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
       return;
     }
 
+    let cancelled = false;
+    let acquired: MIDIAccess | null = null;
+
     navigator.requestMIDIAccess().then(
       (midiAccess) => {
+        if (cancelled) return;
+        acquired = midiAccess;
         midiAccessRef.current = midiAccess;
         updateDeviceList(midiAccess);
         attachInputListeners(midiAccess);
@@ -98,6 +103,16 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
       },
       () => console.error("Failed to access MIDI devices."),
     );
+
+    return () => {
+      cancelled = true;
+      if (acquired) {
+        acquired.onstatechange = null;
+        for (const input of acquired.inputs.values()) {
+          input.onmidimessage = null;
+        }
+      }
+    };
   }, [updateDeviceList, attachInputListeners]);
 
   const getOutput = useCallback((): MIDIOutput | undefined => {

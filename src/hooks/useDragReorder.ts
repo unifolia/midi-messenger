@@ -14,7 +14,6 @@ const useDragReorder = (
   items: { id: number }[],
   onCommit: (orderedIds: number[]) => void,
 ) => {
-
   const [orderedIds, setOrderedIds] = useState<number[]>(() =>
     items.map((i) => i.id),
   );
@@ -27,8 +26,13 @@ const useDragReorder = (
   const needsFlipRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragActiveRef = useRef(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
-  onCommitRef.current = onCommit;
+  useEffect(() => {
+    onCommitRef.current = onCommit;
+  }, [onCommit]);
+
+  useEffect(() => () => cleanupRef.current?.(), []);
 
   useEffect(() => {
     if (dragActiveRef.current) return;
@@ -59,7 +63,6 @@ const useDragReorder = (
 
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
 
-      // Cancel ongoing animations so the new one starts cleanly
       el.getAnimations().forEach((a) => a.cancel());
 
       el.animate(
@@ -102,8 +105,6 @@ const useDragReorder = (
       slots.push({ id, rect: el.getBoundingClientRect() });
     }
 
-    // Detect multi-column layout by scanning adjacent pairs. If any pair
-    // vertically overlaps, cards are laid out side-by-side.
     let singleColumn = true;
     for (let i = 1; i < slots.length; i++) {
       if (slots[i].rect.top < slots[i - 1].rect.bottom - 1) {
@@ -164,6 +165,8 @@ const useDragReorder = (
 
     let clone: HTMLElement | null = null;
     let activated = false;
+    let finished = false;
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
     const originalOrder = [...orderedIdsRef.current];
 
     const activate = () => {
@@ -231,11 +234,29 @@ const useDragReorder = (
       document.body.style.userSelect = "";
     };
 
+    const abort = () => {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      if (settleTimer !== null) {
+        clearTimeout(settleTimer);
+        settleTimer = null;
+      }
+      if (clone) clone.remove();
+      el.style.opacity = "";
+      el.style.transition = "";
+      dragActiveRef.current = false;
+      cleanupRef.current = null;
+    };
+
     const onUp = () => {
+      if (finished) return;
       cleanup();
 
       if (!activated || !clone) {
+        finished = true;
         dragActiveRef.current = false;
+        cleanupRef.current = null;
         return;
       }
 
@@ -259,32 +280,31 @@ const useDragReorder = (
       clone.style.opacity = "1";
 
       const cloneToRemove = clone;
-      setTimeout(() => {
+      settleTimer = setTimeout(() => {
+        settleTimer = null;
+        if (finished) return;
+        finished = true;
         cloneToRemove.remove();
         el.style.opacity = "";
         el.style.transition = "";
         setDraggedId(null);
         dragActiveRef.current = false;
+        cleanupRef.current = null;
         onCommitRef.current(orderedIdsRef.current);
       }, 200);
     };
 
     const onKeyDown = (ke: KeyboardEvent) => {
       if (ke.key === "Escape") {
-        cleanup();
-
-        if (clone) clone.remove();
-        el.style.opacity = "";
-        el.style.transition = "";
-
         snapshotRects();
         orderedIdsRef.current = originalOrder;
         setOrderedIds(originalOrder);
         setDraggedId(null);
-        dragActiveRef.current = false;
+        abort();
       }
     };
 
+    cleanupRef.current = abort;
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
     document.addEventListener("keydown", onKeyDown);

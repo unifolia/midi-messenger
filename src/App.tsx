@@ -8,43 +8,51 @@ import Navigation from "./lib/NavBar";
 import Device from "./lib/Device";
 import useMIDI from "./hooks/useMIDI";
 import useDragReorder from "./hooks/useDragReorder";
+import { parsePreset } from "./util/presetIo";
 import type { MidiCCFormData, MidiPCFormData, Layout } from "./types";
 
 const DEFAULT_BG = "#909090";
 const MAX_BLOCKS = 75;
 
+const INITIAL_CC: MidiCCFormData[] = [
+  {
+    id: 1,
+    midiChannel: 1,
+    midiCC: 1,
+    value: 64,
+    label: "MIDI Control Block",
+    backgroundColor: DEFAULT_BG,
+  },
+];
+
+const INITIAL_PC: MidiPCFormData[] = [
+  {
+    id: -1,
+    midiChannel: 1,
+    program: 0,
+    label: "Program Change",
+    backgroundColor: DEFAULT_BG,
+  },
+];
+
 const App = () => {
   const [layout, setLayout] = useState<Layout>("tile");
   const [forms, setForms] = useState({
     name: "Untitled Preset",
-    inputs: [
-      {
-        id: 1,
-        midiChannel: 1,
-        midiCC: 1,
-        value: 64,
-        label: "MIDI Control Block",
-        backgroundColor: DEFAULT_BG,
-      },
-    ],
+    inputs: INITIAL_CC,
   });
-  const nextIdRef = useRef(2);
+  const nextIdRef = useRef(Math.max(...INITIAL_CC.map((f) => f.id), 0) + 1);
   const [globalMidiChannel, setGlobalMidiChannel] = useState<number | null>(
     null,
   );
 
-  const [pcForms, setPcForms] = useState<MidiPCFormData[]>([
-    {
-      id: -1,
-      midiChannel: 1,
-      program: 0,
-      label: "Program Change",
-      backgroundColor: DEFAULT_BG,
-    },
-  ]);
-  const nextPcIdRef = useRef(-2);
+  const [pcForms, setPcForms] = useState<MidiPCFormData[]>(INITIAL_PC);
+  const nextPcIdRef = useRef(Math.min(...INITIAL_PC.map((f) => f.id), 0) - 1);
 
-  const [formOrder, setFormOrder] = useState<number[]>([1, -1]);
+  const [formOrder, setFormOrder] = useState<number[]>([
+    ...INITIAL_CC.map((f) => f.id),
+    ...INITIAL_PC.map((f) => f.id),
+  ]);
   const blockCount = forms.inputs.length + pcForms.length;
 
   const onCC = useCallback((channel: number, cc: number, value: number) => {
@@ -102,9 +110,9 @@ const App = () => {
     return map;
   }, [forms.inputs, pcForms]);
 
-  const handleGlobalMidiChannelChange = (newGlobalChannel: number) => {
-    setGlobalMidiChannel(newGlobalChannel);
-    if (newGlobalChannel !== null) {
+  const handleGlobalMidiChannelChange = useCallback(
+    (newGlobalChannel: number) => {
+      setGlobalMidiChannel(newGlobalChannel);
       setForms((prev) => ({
         ...prev,
         inputs: prev.inputs.map((form) => ({
@@ -115,8 +123,9 @@ const App = () => {
       setPcForms((prev) =>
         prev.map((pc) => ({ ...pc, midiChannel: newGlobalChannel })),
       );
-    }
-  };
+    },
+    [],
+  );
 
   const getLastBackgroundColor = () => {
     for (let i = formOrder.length - 1; i >= 0; i--) {
@@ -137,7 +146,7 @@ const App = () => {
         ...prev.inputs,
         {
           id,
-          midiChannel: globalMidiChannel || 1,
+          midiChannel: globalMidiChannel ?? 1,
           midiCC: 1,
           value: 64,
           label: "MIDI Control Block",
@@ -206,7 +215,7 @@ const App = () => {
     const preset = {
       name: forms.name,
       timestamp: new Date().toISOString(),
-      forms: forms.inputs,
+      inputs: forms.inputs,
       pcForms,
       formOrder,
       globalMidiChannel,
@@ -241,99 +250,40 @@ const App = () => {
     }
   };
 
-  const handleLoadPreset = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (file) {
+  const handleLoadPreset = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
       const reader = new FileReader();
       reader.onload = (event: ProgressEvent<FileReader>) => {
-        try {
-          const result = event.target?.result as string;
-          const preset = JSON.parse(result);
-          if (!Array.isArray(preset.forms) && !Array.isArray(preset.pcForms)) {
-            alert("Invalid preset file");
-            return;
-          }
+        const text = event.target?.result as string;
+        const result = parsePreset(text, MAX_BLOCKS);
 
-          const validForms = (
-            Array.isArray(preset.forms) ? preset.forms : []
-          ).filter(
-            (f: Record<string, unknown>) =>
-              typeof f.id === "number" &&
-              typeof f.midiChannel === "number" &&
-              typeof f.midiCC === "number" &&
-              typeof f.value === "number" &&
-              typeof f.label === "string" &&
-              typeof f.backgroundColor === "string",
-          ) as MidiCCFormData[];
-
-          const loadedPcForms = (
-            Array.isArray(preset.pcForms) ? preset.pcForms : []
-          ).filter(
-            (f: Record<string, unknown>) =>
-              typeof f.id === "number" &&
-              typeof f.midiChannel === "number" &&
-              typeof f.program === "number" &&
-              typeof f.label === "string" &&
-              typeof f.backgroundColor === "string",
-          ) as MidiPCFormData[];
-
-          const validBlockCount = validForms.length + loadedPcForms.length;
-
-          if (validBlockCount === 0) {
+        if (!result.ok) {
+          if (result.error === "empty") {
             alert("No valid blocks found in preset file");
-            return;
-          }
-
-          if (validBlockCount > MAX_BLOCKS) {
-            alert(`Preset files can include up to ${MAX_BLOCKS} blocks`);
-            return;
-          }
-
-          setForms({
-            name:
-              typeof preset.name === "string" ? preset.name : "Untitled Preset",
-            inputs: validForms,
-          });
-
-          const maxId = Math.max(...validForms.map((f) => f.id), 0);
-          nextIdRef.current = maxId + 1;
-
-          setPcForms(loadedPcForms);
-          const minPcId = Math.min(...loadedPcForms.map((f) => f.id), 0);
-          nextPcIdRef.current = minPcId - 1;
-
-          const allLoadedIds = new Set([
-            ...validForms.map((f) => f.id),
-            ...loadedPcForms.map((f) => f.id),
-          ]);
-
-          if (Array.isArray(preset.formOrder)) {
-            const validOrder = preset.formOrder.filter(
-              (id: unknown): id is number =>
-                typeof id === "number" && allLoadedIds.has(id),
-            );
-            const inOrder = new Set(validOrder);
-            for (const id of allLoadedIds) {
-              if (!inOrder.has(id)) validOrder.push(id);
-            }
-            setFormOrder(validOrder);
+          } else if (result.error === "too-many") {
+            alert(`Preset files can include up to ${result.max} blocks`);
           } else {
-            setFormOrder([...allLoadedIds]);
+            alert("Invalid preset file");
           }
-
-          setGlobalMidiChannel(
-            typeof preset.globalMidiChannel === "number"
-              ? preset.globalMidiChannel
-              : null,
-          );
-        } catch (error) {
-          alert("Invalid preset file");
+          return;
         }
+
+        const { preset } = result;
+        setForms({ name: preset.name, inputs: preset.inputs });
+        nextIdRef.current = Math.max(...preset.inputs.map((f) => f.id), 0) + 1;
+        setPcForms(preset.pcForms);
+        nextPcIdRef.current =
+          Math.min(...preset.pcForms.map((f) => f.id), 0) - 1;
+        setFormOrder(preset.formOrder);
+        setGlobalMidiChannel(preset.globalMidiChannel);
       };
       reader.readAsText(file);
-    }
-  };
+    },
+    [],
+  );
 
   return (
     <main>

@@ -1,20 +1,18 @@
 # MIDI Messenger
 
-MIDI Messenger is a friendly control station for your MIDI-equipped guitar
-pedals. Pick a device, nudge some sliders, fire a program change, and save the
-whole setup as a preset for next time.
+MIDI Messenger is a control station for your MIDI-equipped guitar pedals. Pick a device, nudge some sliders, fire a program change, and save the whole setup as a preset for next time. 🎸
 
 At its core, the app is built around blocks: small modules that _do a thing_.
 Blocks can send CC messages, which are often used to change individual
-parameters or settings, or PC messages, which are usually used for more 'advanced' things like saving and recalling presets.
+parameters or settings, or PC messages, which are usually used for more 'advanced' things like saving and recalling presets. 🕺
 
 ## Use the MIDI Messenger to:
 
-- Send CC and PC messages to your favorite MIDI gear.
-- Customize the label and background color of each block.
-- Drag to reorder your blocks.
-- Switch between tile and strip layouts.
-- Save and load presets, which contain _ALL_ of your blocks!
+- Send CC and PC messages to your favorite MIDI gear. 📞
+- Customize the label and background color of each block. 🌈
+- Drag to reorder your blocks. 🔀
+- Switch between tile and strip layouts for the entire grid. 🏄‍♂️
+- Save and load presets, which contain _ALL_ of your blocks! 🧠
 
 ## Quick Start
 
@@ -34,6 +32,7 @@ CC blocks send MIDI Control Change messages.
 - **Value** sends values 0-127 as the slider moves.
 - Click or focus the block's title to rename it.
 - The color swatch opens a picker for a custom background.
+- Refer to your pedal or device's MIDI documentation for what CC message corresponds to what setting.
 
 ### PC Blocks
 
@@ -43,6 +42,7 @@ PC blocks send MIDI Program Change messages.
 - **MIDI PC** chooses PC numbers 0-127.
 - **Send** fires the selected program change.
 - Titles and colors work the same way as they do for CC blocks.
+- Refer to your pedal or device's MIDI documentation for what PC message corresponds to what setting.
 
 ### Global Channel
 
@@ -55,9 +55,11 @@ on that channel too.
 Use the layout button to switch between:
 
 - **Tile**: a grid of blocks. Think cards, thumbnails, etc.
-- **Strip**: a more compact row-style layout.
+- **Strip**: a more compact row-style layout. Helpful for fitting a lot on your screen, especially at larger screen widths.
 
 On narrow screens, the app keeps things stacked so controls stay usable.
+
+You can have up to 75 blocks in total. This is probably too many blocks... but, hey, do your thing. 🔢
 
 ## Presets
 
@@ -73,9 +75,6 @@ Presets are saved as JSON files. A preset includes:
 Load saved files with **Load Preset**. The loader validates the shape of the preset
 file before applying it, so that you can't just load anything.
 
-A preset needs at least one valid block, either CC or PC. It can include up to
-75 blocks total.
-
 ## Troubleshooting
 
 **No devices appear**
@@ -86,4 +85,4 @@ then refresh the page. Also check that the browser has permission to use MIDI.
 **Anything else**
 
 Contact me at james@jameslewis.io if anything is funky, and I will try to fix it
-ASAP. I have done my best to keep things smooth, but stuff happens.
+ASAP. I have done my best to keep things smooth, but stuff happens. 🤷‍♂️😗

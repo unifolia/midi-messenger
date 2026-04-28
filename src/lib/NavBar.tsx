@@ -2,13 +2,11 @@ import {
   NavBar,
   NavButton,
   LoadButton,
-  Input,
   GlobalChannelContainer,
   GlobalChannelLabel,
   GlobalChannelSelect,
   LayoutButton,
 } from "../styles/components";
-import { Label } from "../styles/GlobalStyles";
 import type { Layout } from "../types";
 
 interface NavigationProps {
@@ -37,10 +35,9 @@ const Navigation = ({
       <NavButton onClick={handleAddCCInput}>Add CC Input</NavButton>
       <NavButton onClick={handleAddPCInput}>Add PC Input</NavButton>
       <NavButton onClick={savePreset}>Save Preset</NavButton>
-      <LoadButton>
+      <LoadButton htmlFor="upload">
         Load Preset
-        <Label htmlFor="upload">Load Preset</Label>
-        <Input
+        <input
           id="upload"
           type="file"
           accept=".json"

@@ -77,6 +77,8 @@ const stackedRangeBox = css`
   margin-bottom: ${theme.spacing.sm};
 `;
 
+const tileSlotHeight = "48px";
+
 export const NavBar = styled.nav`
   display: flex;
   justify-content: center;
@@ -106,8 +108,11 @@ export const NavButton = styled(BaseButton)`
   min-width: 120px;
 `;
 
-export const LoadButton = styled(NavButton)`
+export const LoadButton = styled(NavButton).attrs({ as: "label" })`
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   input {
     position: absolute;
@@ -401,21 +406,19 @@ export const FormGroup = styled.div`
     margin-bottom: 0;
   `)}
 
+  &:has(input[type="range"]) {
+    ${narrowStacked(stackedRangeBox)}
+  }
+
+  [data-layout="tile"] &:has(input[type="range"]) {
+    @media (min-width: calc(${theme.breakpoints.narrow} + 1px)) {
+      min-height: ${tileSlotHeight};
+    }
+  }
+
   [data-layout="row"] &:has(input[type="range"]) {
     @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
       min-width: 150px;
-    }
-  }
-
-  &:has(input[type="range"]) {
-    @media (max-width: ${theme.breakpoints.narrow}) {
-      ${stackedRangeBox}
-    }
-  }
-
-  [data-layout="row"] &:has(input[type="range"]) {
-    @media (max-width: ${theme.breakpoints.rowStack}) {
-      ${stackedRangeBox}
     }
   }
 
@@ -687,6 +690,12 @@ export const SendButton = styled(BaseButton)`
   );
   align-self: center;
 
+  [data-layout="tile"] & {
+    @media (min-width: calc(${theme.breakpoints.narrow} + 1px)) {
+      height: ${tileSlotHeight};
+    }
+  }
+
   ${rowWide(css`
     margin-top: 0;
     margin-bottom: 0;
@@ -698,15 +707,11 @@ export const SendButton = styled(BaseButton)`
   `)}
 
   ${narrowStacked(css`
-    margin-top: ${theme.spacing.sm};
-    margin-bottom: ${theme.spacing.sm};
-    height: 40px;
-    box-sizing: border-box;
+    ${stackedRangeBox}
     padding: 0 ${theme.spacing.md};
     font-size: ${theme.fonts.sizes.label};
     display: flex;
     align-items: center;
-    justify-content: center;
   `)}
 
   &.sent {
@@ -745,10 +750,6 @@ export const DeviceHeading = styled.h2`
 
 export const FooterText = styled.p`
   font-size: 1.25rem;
-`;
-
-export const Input = styled.input`
-  cursor: pointer;
 `;
 
 export const SelectRow = styled.div`

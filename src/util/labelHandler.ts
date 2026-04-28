@@ -16,12 +16,8 @@ export const handleLabelBlur = (
   name: string | number,
   setName: (name: string) => void,
 ) => {
-  if (name) {
-    setIsEditing(false);
-  } else {
-    setName("Untitled");
-    setIsEditing(false);
-  }
+  if (!name) setName("Untitled");
+  setIsEditing(false);
 };
 
 export const handleLabelKeyDown = (
