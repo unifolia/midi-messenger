@@ -4,9 +4,6 @@ import { theme } from "./theme";
 import { BaseButton } from "./GlobalStyles";
 import type { Layout } from "../types";
 
-// Styling mixins for layout-dependent breakpoints. A card is "narrow-stacked"
-// when it's rendering vertically in a single column: either tile mode at
-// ≤narrow, or row mode at ≤rowStack. "Row-wide" means row mode at >rowStack.
 const rowWide = (styles: ReturnType<typeof css>) => css`
   [data-layout="row"] & {
     @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
@@ -72,6 +69,14 @@ const inlineSelectNarrow = css`
   }
 `;
 
+const stackedRangeBox = css`
+  height: 40px;
+  box-sizing: border-box;
+  justify-content: center;
+  margin-top: ${theme.spacing.sm};
+  margin-bottom: ${theme.spacing.sm};
+`;
+
 export const NavBar = styled.nav`
   display: flex;
   justify-content: center;
@@ -98,7 +103,6 @@ export const NavBar = styled.nav`
 `;
 
 export const NavButton = styled(BaseButton)`
-  margin: 0;
   min-width: 120px;
 `;
 
@@ -121,7 +125,6 @@ export const GlobalChannelContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: ${theme.spacing.sm};
-  margin: 0;
 `;
 
 export const LayoutButton = styled(NavButton)`
@@ -201,6 +204,7 @@ export const FormHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: ${theme.spacing.md};
   margin-bottom: ${theme.spacing.lg};
   padding-bottom: ${theme.spacing.md};
   border-bottom: 1px solid var(--surface-glass-border);
@@ -220,11 +224,9 @@ export const FormHeader = styled.div`
 
 export const FormHeaderContent = styled.div`
   flex: 1;
-  margin-right: ${theme.spacing.md};
 
   ${rowWide(css`
     flex: 0 0 auto;
-    margin-right: 0;
   `)}
 `;
 
@@ -303,10 +305,6 @@ export const FormTitleInput = styled.input`
   `)}
 `;
 
-// Rendered twice per card — once inside FormHeader (data-placement="header")
-// for tile mode / narrow-stacked, once at the card end (data-placement="end")
-// for row-wide. CSS toggles display: none so only one is visible at a time,
-// keeping the hidden duplicate out of the accessibility tree.
 export const RemoveButton = styled.button`
   width: 32px;
   height: 32px;
@@ -405,6 +403,18 @@ export const FormGroup = styled.div`
     }
   }
 
+  &:has(input[type="range"]) {
+    @media (max-width: ${theme.breakpoints.narrow}) {
+      ${stackedRangeBox}
+    }
+  }
+
+  [data-layout="row"] &:has(input[type="range"]) {
+    @media (max-width: ${theme.breakpoints.rowStack}) {
+      ${stackedRangeBox}
+    }
+  }
+
   [data-layout="row"] &:has(select) {
     @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
       ${inlineSelectWide}
@@ -442,6 +452,10 @@ export const ColorPicker = styled(FormGroup)`
     margin-left: auto;
     flex: 0 0 auto;
     gap: ${theme.spacing.sm};
+  `)}
+
+  ${narrowStacked(css`
+    padding-top: 0;
   `)}
 `;
 
@@ -644,7 +658,6 @@ export const RangeInput = styled.input`
 `;
 
 export const GlobalChannelLabel = styled(FormLabel)`
-  margin: 0;
   font-size: ${theme.fonts.sizes.body};
   color: var(--text-primary);
 
@@ -655,25 +668,41 @@ export const GlobalChannelLabel = styled(FormLabel)`
 
 export const GlobalChannelSelect = styled(Select)`
   min-width: 80px;
-  margin: 0;
 `;
 
 export const SendButton = styled(BaseButton)`
-  width: 50%;
+  box-sizing: border-box;
+  width: 100%;
   min-width: 100px;
   font-weight: ${theme.fonts.weights.medium};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: ${theme.spacing.md};
+  margin-top: ${theme.spacing.sm};
+  margin-bottom: calc(
+    ${theme.spacing.md} + ${theme.spacing.sm} - ${theme.spacing.lg}
+  );
   align-self: center;
 
   ${rowWide(css`
     margin-top: 0;
+    margin-bottom: 0;
     width: auto;
     flex: 0 0 auto;
     padding: 0.35rem ${theme.spacing.md};
     font-size: ${theme.fonts.sizes.label};
     min-width: auto;
+  `)}
+
+  ${narrowStacked(css`
+    margin-top: ${theme.spacing.sm};
+    margin-bottom: ${theme.spacing.sm};
+    height: 40px;
+    box-sizing: border-box;
+    padding: 0 ${theme.spacing.md};
+    font-size: ${theme.fonts.sizes.label};
+    display: flex;
+    align-items: center;
+    justify-content: center;
   `)}
 
   &.sent {
