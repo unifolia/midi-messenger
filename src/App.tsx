@@ -11,6 +11,7 @@ import useDragReorder from "./hooks/useDragReorder";
 import type { MidiCCFormData, MidiPCFormData, Layout } from "./types";
 
 const DEFAULT_BG = "#909090";
+const MAX_BLOCKS = 75;
 
 const App = () => {
   const [layout, setLayout] = useState<Layout>("tile");
@@ -44,6 +45,7 @@ const App = () => {
   const nextPcIdRef = useRef(-2);
 
   const [formOrder, setFormOrder] = useState<number[]>([1, -1]);
+  const blockCount = forms.inputs.length + pcForms.length;
 
   const onCC = useCallback((channel: number, cc: number, value: number) => {
     setForms((prev) => ({
@@ -125,25 +127,25 @@ const App = () => {
   };
 
   const handleAddCCInput = () => {
-    if (forms.inputs.length < 50) {
-      const id = nextIdRef.current++;
-      const lastColor = getLastBackgroundColor();
-      setForms((prev) => ({
-        ...prev,
-        inputs: [
-          ...prev.inputs,
-          {
-            id,
-            midiChannel: globalMidiChannel || 1,
-            midiCC: 1,
-            value: 64,
-            label: "MIDI Control Block",
-            backgroundColor: lastColor,
-          },
-        ],
-      }));
-      setFormOrder((prev) => [...prev, id]);
-    }
+    if (blockCount >= MAX_BLOCKS) return;
+
+    const id = nextIdRef.current++;
+    const lastColor = getLastBackgroundColor();
+    setForms((prev) => ({
+      ...prev,
+      inputs: [
+        ...prev.inputs,
+        {
+          id,
+          midiChannel: globalMidiChannel || 1,
+          midiCC: 1,
+          value: 64,
+          label: "MIDI Control Block",
+          backgroundColor: lastColor,
+        },
+      ],
+    }));
+    setFormOrder((prev) => [...prev, id]);
   };
 
   const handleRemoveCCForm = useCallback((id: number) => {
@@ -155,6 +157,8 @@ const App = () => {
   }, []);
 
   const handleAddPCInput = () => {
+    if (blockCount >= MAX_BLOCKS) return;
+
     const id = nextPcIdRef.current--;
     const lastColor = getLastBackgroundColor();
     setPcForms((prev) => [
@@ -246,12 +250,14 @@ const App = () => {
         try {
           const result = event.target?.result as string;
           const preset = JSON.parse(result);
-          if (!preset.forms || !Array.isArray(preset.forms)) {
+          if (!Array.isArray(preset.forms) && !Array.isArray(preset.pcForms)) {
             alert("Invalid preset file");
             return;
           }
 
-          const validForms = preset.forms.filter(
+          const validForms = (
+            Array.isArray(preset.forms) ? preset.forms : []
+          ).filter(
             (f: Record<string, unknown>) =>
               typeof f.id === "number" &&
               typeof f.midiChannel === "number" &&
@@ -261,8 +267,26 @@ const App = () => {
               typeof f.backgroundColor === "string",
           ) as MidiCCFormData[];
 
-          if (validForms.length === 0) {
-            alert("No valid CC forms found in preset file");
+          const loadedPcForms = (
+            Array.isArray(preset.pcForms) ? preset.pcForms : []
+          ).filter(
+            (f: Record<string, unknown>) =>
+              typeof f.id === "number" &&
+              typeof f.midiChannel === "number" &&
+              typeof f.program === "number" &&
+              typeof f.label === "string" &&
+              typeof f.backgroundColor === "string",
+          ) as MidiPCFormData[];
+
+          const validBlockCount = validForms.length + loadedPcForms.length;
+
+          if (validBlockCount === 0) {
+            alert("No valid blocks found in preset file");
+            return;
+          }
+
+          if (validBlockCount > MAX_BLOCKS) {
+            alert(`Preset files can include up to ${MAX_BLOCKS} blocks`);
             return;
           }
 
@@ -275,32 +299,9 @@ const App = () => {
           const maxId = Math.max(...validForms.map((f) => f.id), 0);
           nextIdRef.current = maxId + 1;
 
-          let loadedPcForms: MidiPCFormData[] = [];
-          if (Array.isArray(preset.pcForms)) {
-            loadedPcForms = preset.pcForms.filter(
-              (f: Record<string, unknown>) =>
-                typeof f.id === "number" &&
-                typeof f.midiChannel === "number" &&
-                typeof f.program === "number" &&
-                typeof f.label === "string" &&
-                typeof f.backgroundColor === "string",
-            ) as MidiPCFormData[];
-            if (loadedPcForms.length > 0) {
-              setPcForms(loadedPcForms);
-              const minPcId = Math.min(...loadedPcForms.map((f) => f.id), 0);
-              nextPcIdRef.current = minPcId - 1;
-            }
-          } else if (
-            preset.pcForm &&
-            typeof preset.pcForm.midiChannel === "number" &&
-            typeof preset.pcForm.program === "number" &&
-            typeof preset.pcForm.label === "string" &&
-            typeof preset.pcForm.backgroundColor === "string"
-          ) {
-            loadedPcForms = [{ id: -1, ...preset.pcForm }];
-            setPcForms(loadedPcForms);
-            nextPcIdRef.current = -2;
-          }
+          setPcForms(loadedPcForms);
+          const minPcId = Math.min(...loadedPcForms.map((f) => f.id), 0);
+          nextPcIdRef.current = minPcId - 1;
 
           const allLoadedIds = new Set([
             ...validForms.map((f) => f.id),
@@ -308,9 +309,9 @@ const App = () => {
           ]);
 
           if (Array.isArray(preset.formOrder)) {
-            // Filter out stale IDs and append any missing ones
-            const validOrder = preset.formOrder.filter((id: number) =>
-              allLoadedIds.has(id),
+            const validOrder = preset.formOrder.filter(
+              (id: unknown): id is number =>
+                typeof id === "number" && allLoadedIds.has(id),
             );
             const inOrder = new Set(validOrder);
             for (const id of allLoadedIds) {
@@ -318,13 +319,14 @@ const App = () => {
             }
             setFormOrder(validOrder);
           } else {
-            // Backward compat: CC forms first, then PC forms
             setFormOrder([...allLoadedIds]);
           }
 
-          if (typeof preset.globalMidiChannel === "number") {
-            setGlobalMidiChannel(preset.globalMidiChannel);
-          }
+          setGlobalMidiChannel(
+            typeof preset.globalMidiChannel === "number"
+              ? preset.globalMidiChannel
+              : null,
+          );
         } catch (error) {
           alert("Invalid preset file");
         }
@@ -407,7 +409,7 @@ const App = () => {
         })}
       </FormsContainer>
       <footer>
-        <FooterText>𐙦 Midi Engineering</FooterText>
+        <FooterText>𐙦 Midi Engineering | <a href="https://github.com/unifolia/midi-messenger">Documentation</a></FooterText>
       </footer>
     </main>
   );

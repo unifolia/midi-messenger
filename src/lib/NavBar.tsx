@@ -38,8 +38,8 @@ const Navigation = ({
       <NavButton onClick={handleAddPCInput}>Add PC Input</NavButton>
       <NavButton onClick={savePreset}>Save Preset</NavButton>
       <LoadButton>
-        Upload Preset
-        <Label htmlFor="upload">Upload Preset</Label>
+        Load Preset
+        <Label htmlFor="upload">Load Preset</Label>
         <Input
           id="upload"
           type="file"

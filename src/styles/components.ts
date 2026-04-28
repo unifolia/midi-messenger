@@ -234,6 +234,8 @@ export const FormTitleDisplay = styled.h3`
   margin: 0;
   padding: ${theme.spacing.xs} ${theme.spacing.sm};
   font-size: ${theme.fonts.sizes.form};
+  line-height: 1.4;
+  min-height: 2.55rem;
   font-weight: ${theme.fonts.weights.normal};
   color: var(--text-primary);
   text-transform: lowercase;
@@ -280,6 +282,8 @@ export const FormTitleInput = styled.input`
   max-width: 100%;
   padding: ${theme.spacing.xs} ${theme.spacing.sm};
   font-size: ${theme.fonts.sizes.form};
+  line-height: 1.4;
+  min-height: 2.55rem;
   font-weight: ${theme.fonts.weights.normal};
   font-family: inherit;
   color: var(--text-primary);

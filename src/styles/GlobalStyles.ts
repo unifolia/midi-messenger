@@ -61,6 +61,11 @@ export const GlobalStyles = createGlobalStyle`
   footer {
     margin-top: auto;
   }
+
+  a,
+  a:visited {
+    color: var(--primary-light);
+  }
 `;
 
 export const Title = styled.h1`
@@ -76,6 +81,12 @@ export const Title = styled.h1`
   background-clip: text;
   text-shadow: ${theme.shadows.textGlow};
   margin: 0 0 ${theme.spacing.xl} 0;
+
+  &::selection {
+    background: ${theme.colors.primaryAlpha30};
+    color: var(--text-primary);
+    -webkit-text-fill-color: var(--text-primary);
+  }
 `;
 
 export const BaseButton = styled.button`
