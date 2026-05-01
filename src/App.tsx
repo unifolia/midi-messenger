@@ -292,7 +292,7 @@ const App = () => {
       {isMidiOutput ? (
         <Device device={device} deviceList={deviceList} setDevice={setDevice} />
       ) : (
-        <h2>No Midi Devices Connected</h2>
+        <h2>No MIDI Devices Connected</h2>
       )}
 
       <Navigation
@@ -359,7 +359,7 @@ const App = () => {
         })}
       </FormsContainer>
       <footer>
-        <FooterText>𐙦 Midi Engineering | <a href="https://github.com/unifolia/midi-messenger">Documentation</a></FooterText>
+        <FooterText><a id="mothership" href="https://midi.engineering">𐙦 MIDI Engineering</a> | <a href="https://github.com/unifolia/midi-messenger">Documentation</a></FooterText>
       </footer>
     </main>
   );

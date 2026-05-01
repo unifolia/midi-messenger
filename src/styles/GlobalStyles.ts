@@ -66,6 +66,11 @@ export const GlobalStyles = createGlobalStyle`
   a:visited {
     color: var(--primary-light);
   }
+
+  #mothership {
+    color: white;
+    text-decoration: none;
+  }
 `;
 
 export const Title = styled.h1`
